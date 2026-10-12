@@ -84,7 +84,7 @@ The whole 6-step demo script below uses about **6–8 requests**, far below the 
 
 ## Switch to the Groq backup
 
-If Gemini is down or rate-limited, open `.env`, put `#` in front of the three Gemini lines, and remove the `#` from the three Groq lines. Paste a key from [console.groq.com](https://console.groq.com/keys) and keep `MODEL=llama-3.3-70b-versatile` (or another model from the Groq console). Restart the app. No code changes are needed.
+If Gemini is down or rate-limited, open `.env`, put `#` in front of the three Gemini lines, and remove the `#` from the three Groq lines. Paste a key from [console.groq.com](https://console.groq.com/keys) and keep `MODEL=openai/gpt-oss-120b` (or another model from the Groq console). Restart the app. No code changes are needed.
 
 ## Classroom demo script
 
