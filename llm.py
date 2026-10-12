@@ -19,7 +19,10 @@ class LLMError(Exception):
     """Raised for any LLM problem. The message is safe to show to users."""
 
 
-BUSY_MESSAGE = "The AI service is busy. Wait a minute and try again."
+BUSY_MESSAGE = (
+    "The AI service is busy, or the free limit is used up. Wait a minute and try again. "
+    "If it keeps happening, switch to the Groq backup in .env."
+)
 FORMAT_MESSAGE = "The AI did not return the expected format. Try again."
 JSON_RETRY_SUFFIX = "\n\nYour previous reply was not valid JSON. Reply again with ONLY valid JSON."
 

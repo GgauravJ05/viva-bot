@@ -56,6 +56,32 @@ streamlit run app.py
 
 Your browser opens at `http://localhost:8501`. To stop the app, press `Ctrl + C` in the terminal.
 
+## Keeping it free (no charges, no surprise limits)
+
+**You cannot be charged as long as billing is off.** A key made in Google AI Studio starts on the **free tier**, and you don't need a credit card. Charges are only possible if you choose *Set up billing* on that project, so don't do that. If you hit the free limit, the app shows "The AI service is busy, or the free limit is used up…". The request simply fails and nothing is billed.
+
+**Free-tier limits** are a number of requests per minute and per day, and they vary by model. Check the current numbers on Google's [rate limits page](https://ai.google.dev/gemini-api/docs/rate-limits), and your usage in [AI Studio](https://aistudio.google.com/) under *Usage*.
+
+**How many requests the app uses:**
+
+| Action | AI requests |
+| --- | --- |
+| Uploading and processing notes | **0**: searching runs on your laptop |
+| Generate viva questions | 1 (2 in the rare case the AI returns bad JSON) |
+| Ask a doubt | 1 per question |
+| Make a quiz | 1 (2 in the rare case of bad JSON) |
+| Checking quiz answers, opening key points, downloading | **0** |
+
+The whole 6-step demo script below uses about **6–8 requests**, far below the free daily limit.
+
+**Tips for class:**
+- **One person clicks.** Run the demo from the projector laptop. If 60 students each use their own copy with *your* key, they share your one limit. Each student should make their own free key.
+- **Don't double-click.** Wait for the "Thinking…" spinner to finish. Each click is a new request.
+- **Rehearse once, not twenty times.** Test the demo the day before, then leave it.
+- **Have the backup ready.** Put a free [Groq](https://console.groq.com/keys) key (also no card) in `.env` as the commented backup. If Gemini says "busy", switch and restart.
+- **Free-tier privacy:** Google may use free-tier requests to improve its products. Upload class notes, never personal or confidential documents.
+- **Keep the key secret.** It belongs only in `.env`, never in code, chat, screenshots or GitHub. If it leaks, delete it in AI Studio and make a new one.
+
 ## Switch to the Groq backup
 
 If Gemini is down or rate-limited, open `.env`, put `#` in front of the three Gemini lines, and remove the `#` from the three Groq lines. Paste a key from [console.groq.com](https://console.groq.com/keys) and set `MODEL` to a model name from the Groq console. Restart the app. No code changes are needed.
@@ -77,7 +103,8 @@ The sample PDFs are in `demo_notes/`.
 | --- | --- |
 | "The AI service rejected the request. Check API_KEY…" (HTTP 400/401) | The key is wrong or has spaces around it. Copy it again into `.env`, then restart the app. |
 | "Model not found…" | Model names change. Set `MODEL` in `.env` to a current name from the provider's model list. |
-| "The AI service is busy…" (HTTP 429) | The free tier has a per-minute limit. Wait a minute and try again, or switch to Groq. |
+| "The AI service is busy, or the free limit is used up…" (HTTP 429) | You hit the free per-minute or per-day limit. Wait a minute. If it keeps happening, the daily limit is used up, so switch to Groq. You are not charged. |
+| The first click after starting is slow | Normal: the search model loads once (about 5 seconds). |
 | "API key or model is missing" | `.env` doesn't exist or `API_KEY` / `MODEL` is empty. |
 | "Pages 4, 7 have no readable text…" | Those pages are scanned images. The app only reads typed PDFs, so it skips them. |
 | The first run is slow | The search model (~90 MB) downloads once. Later runs start quickly. |
@@ -92,6 +119,7 @@ The sample PDFs are in `demo_notes/`.
 | `llm.py` | The **only** file that talks to the AI |
 | `prompts.py` | The **only** place the prompts live. Read these! |
 | `config.py` | Settings: chunk size, how many chunks to retrieve, limits |
+| `assets/style.css`, `.streamlit/config.toml` | The look: an exam-paper theme with ink-blue text and red-ink marks |
 | `rag_cli.py` | Test the pipeline without the UI: `python rag_cli.py demo_notes/DBMS_Normalisation.pdf "What is 2NF?"` |
 
 Run the tests (no API key needed) with `pytest`.
