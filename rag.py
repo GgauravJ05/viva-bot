@@ -104,7 +104,11 @@ def get_embedder() -> SentenceTransformer:
     """Load the embedding model once and reuse it (loading takes a few seconds)."""
     global _embedder
     if _embedder is None:
-        _embedder = SentenceTransformer(EMBED_MODEL)
+        try:
+            # Use the copy already downloaded, so slow classroom Wi-Fi can't stall startup.
+            _embedder = SentenceTransformer(EMBED_MODEL, local_files_only=True)
+        except Exception:
+            _embedder = SentenceTransformer(EMBED_MODEL)  # first run: download it (~90 MB)
     return _embedder
 
 
