@@ -1,0 +1,142 @@
+/* Viva Question Bot: extra styling on top of .streamlit/config.toml.
+   The idea: the app looks like an exam paper. Paper background, ink-blue
+   text, a serif for headings, and marks written in red ink in the margin. */
+
+:root {
+  --paper: #FBF8F2;
+  --paper-deep: #F2EDE2;
+  --card: #FFFDF8;
+  --ink: #1B2340;
+  --ink-soft: #545A70;
+  --ink-blue: #2B3A8C;
+  --rule: #E2DACA;
+  --red-ink: #B42318;
+  --serif: "Fraunces", Georgia, serif;
+}
+
+/* ---------- browser surfaces ---------- */
+::selection { background: #D9DEF5; color: var(--ink); }
+* { scrollbar-color: #CFC6B2 transparent; }
+:focus-visible { outline: 2px solid var(--ink-blue); outline-offset: 2px; }
+[data-testid="stAppDeployButton"], [data-testid="stDecoration"] { display: none; }
+
+.block-container { padding-top: 2.2rem; max-width: 1100px; }
+
+/* ---------- masthead (like the top of a question paper) ---------- */
+.vb-masthead { display: flex; gap: 1.25rem; align-items: center; }
+.vb-masthead img { width: 72px; height: 72px; object-fit: contain; }
+.vb-college {
+  font-family: var(--serif); font-weight: 700; font-size: 1.35rem;
+  letter-spacing: -0.01em; color: var(--ink); margin: 0; line-height: 1.2;
+}
+.vb-dept { color: var(--ink-soft); font-size: 0.92rem; margin: 0.2rem 0 0; }
+/* The double rule printed under an exam paper's header. */
+.vb-rule { border: 0; border-top: 3px double var(--ink); margin: 1rem 0 1.6rem; opacity: 0.85; }
+.vb-title {
+  font-family: var(--serif); font-weight: 600; font-size: clamp(2.2rem, 4.5vw, 3.1rem);
+  letter-spacing: -0.03em; line-height: 1.05; margin: 0 0 0.6rem; color: var(--ink);
+  font-variation-settings: "opsz" 144;
+}
+.vb-lede { color: var(--ink-soft); font-size: 1.08rem; max-width: 62ch; margin: 0 0 1.4rem; text-wrap: pretty; }
+
+/* ---------- tabs ---------- */
+[data-testid="stTabs"] [role="tablist"] { gap: 1.8rem; }
+[data-testid="stTabs"] [role="tab"] p { font-size: 1.1rem !important; font-weight: 600; color: var(--ink-soft); }
+[data-testid="stTabs"] [role="tab"][aria-selected="true"] p { color: var(--ink); }
+[data-testid="stTabs"] [role="tab"][aria-selected="true"] { box-shadow: inset 0 -3px 0 var(--ink-blue); }
+[data-testid="stTabs"] [role="tabpanel"] { padding-top: 1.2rem; }
+
+/* ---------- buttons ---------- */
+.stButton button, .stDownloadButton button {
+  font-weight: 600; padding: 0.5rem 1.1rem;
+  transition: background-color 160ms ease-out, box-shadow 160ms ease-out, transform 160ms ease-out;
+}
+.stButton button[kind="primary"] { box-shadow: 0 1px 2px rgba(27, 35, 64, 0.18), 0 4px 12px -6px rgba(43, 58, 140, 0.5); }
+.stButton button[kind="primary"]:hover { background: #22307A; border-color: #22307A; }
+.stButton button:active { transform: translateY(1px); }
+
+/* ---------- empty state ---------- */
+.vb-empty {
+  border: 1.5px dashed #CFC6B2; border-radius: 0.9rem; padding: 2rem 2.2rem;
+  background: var(--card); max-width: 46rem;
+}
+.vb-empty h3 { font-family: var(--serif); font-weight: 600; font-size: 1.45rem; margin: 0 0 0.35rem; letter-spacing: -0.015em; }
+.vb-empty p { color: var(--ink-soft); margin: 0 0 1.2rem; }
+.vb-empty ol { margin: 0; padding-left: 1.3rem; color: var(--ink); }
+.vb-empty li { margin: 0.35rem 0; padding-left: 0.3rem; }
+.vb-empty li::marker { font-family: var(--serif); font-weight: 600; color: var(--ink-blue); }
+
+/* ---------- viva question cards ---------- */
+[class*="st-key-viva_card"] {
+  background: var(--card);
+  box-shadow: 0 1px 2px rgba(27, 35, 64, 0.06), 0 8px 24px -16px rgba(27, 35, 64, 0.25);
+}
+.vb-q { display: grid; grid-template-columns: auto 1fr auto; gap: 0.9rem; align-items: baseline; }
+.vb-qnum { font-family: var(--serif); font-weight: 700; font-size: 1.25rem; color: var(--ink-blue); }
+.vb-qtext { font-size: 1.12rem; font-weight: 600; line-height: 1.45; margin: 0; color: var(--ink); text-wrap: pretty; }
+/* Marks in the right margin, in red ink, the way an examiner writes them. */
+.vb-marks {
+  font-family: var(--serif); font-style: italic; font-weight: 600; color: var(--red-ink);
+  white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.vb-source { color: var(--ink-soft); font-size: 0.86rem; margin-top: 0.5rem; }
+.vb-source b { font-weight: 600; color: var(--ink); }
+.vb-note {
+  background: var(--paper-deep); border-radius: 0.6rem; padding: 0.8rem 1rem;
+  color: var(--ink); margin-bottom: 1rem;
+}
+
+[data-testid="stExpander"] details { border-color: var(--rule); background: var(--paper); }
+[data-testid="stExpander"] summary p { font-weight: 600; font-size: 0.95rem; }
+
+/* ---------- sidebar ---------- */
+[data-testid="stSidebar"] h2 { font-family: var(--serif); font-weight: 600; letter-spacing: -0.015em; }
+.vb-file { display: flex; justify-content: space-between; gap: 0.6rem; padding: 0.55rem 0; border-bottom: 1px solid var(--rule); font-size: 0.92rem; }
+.vb-file span:first-child { font-weight: 600; overflow-wrap: anywhere; }
+.vb-file span:last-child { color: var(--ink-soft); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.vb-stats { display: grid; grid-template-columns: repeat(3, 1fr); margin: 1rem 0 1.2rem; text-align: center; }
+.vb-stats div + div { border-left: 1px solid var(--rule); }
+.vb-stats b { display: block; font-family: var(--serif); font-size: 1.6rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.vb-stats span { font-size: 0.78rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* ---------- chat ---------- */
+[data-testid="stChatMessage"] { background: transparent; padding: 0.9rem 0.2rem; border-bottom: 1px solid var(--rule); border-radius: 0; }
+[data-testid="stChatMessageAvatarUser"] { background: var(--paper-deep); color: var(--ink); }
+[data-testid="stChatMessageAvatarAssistant"] { background: var(--ink-blue); color: #fff; }
+
+/* ---------- quiz ---------- */
+[class*="st-key-quiz_card"] { background: var(--card); }
+.vb-verdict { font-weight: 600; margin: 0.2rem 0 0.15rem; }
+.vb-verdict.right { color: #1F6B3A; }
+.vb-verdict.wrong { color: var(--red-ink); }
+/* Tick and cross drawn as SVG masks, so they take the verdict's colour. */
+.vb-verdict::before {
+  content: ""; display: inline-block; width: 1em; height: 1em; margin-right: 0.35rem;
+  vertical-align: -0.12em; background: currentColor;
+  -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat;
+}
+.vb-verdict.right { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E"); }
+.vb-verdict.wrong { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.8' stroke-linecap='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E"); }
+/* After checking, the radios are locked; keep the question readable instead of faded. */
+[class*="st-key-quiz_card"] [data-testid="stWidgetLabel"] p { color: var(--ink) !important; font-size: 1.05rem; }
+[class*="st-key-quiz_card"] [role="radiogroup"] label[disabled] p { color: var(--ink-soft) !important; }
+.vb-explain { color: var(--ink-soft); font-size: 0.92rem; margin: 0; }
+
+/* The one authored moment: the score written in red ink and circled, like a marked paper. */
+.vb-score { display: flex; align-items: center; gap: 1.2rem; margin: 1.4rem 0 0.6rem; }
+.vb-score-ring {
+  font-family: var(--serif); font-style: italic; font-weight: 600; font-size: 2.3rem;
+  color: var(--red-ink); border: 2.5px solid var(--red-ink); border-radius: 50%;
+  padding: 0.55rem 1.1rem; transform: rotate(-6deg); font-variant-numeric: tabular-nums;
+  animation: vb-mark 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.vb-score-label { font-family: var(--serif); font-size: 1.25rem; font-weight: 600; }
+.vb-score-label small { display: block; font-family: inherit; font-weight: 400; font-size: 0.95rem; color: var(--ink-soft); }
+@keyframes vb-mark {
+  from { opacity: 0; transform: rotate(-14deg) scale(1.35); filter: blur(3px); }
+  to   { opacity: 1; transform: rotate(-6deg) scale(1); filter: blur(0); }
+}
+@media (prefers-reduced-motion: reduce) { .vb-score-ring { animation: none; } }
+
+/* ---------- footer ---------- */
+.vb-footer { border-top: 1px solid var(--rule); margin-top: 3rem; padding-top: 1rem; color: var(--ink-soft); font-size: 0.85rem; }

@@ -5,6 +5,8 @@ live in rag.py; talking to the LLM lives in llm.py.
 Run with:  streamlit run app.py
 """
 
+import base64
+from html import escape
 from pathlib import Path
 
 import streamlit as st
@@ -14,8 +16,22 @@ from llm import LLMError, answer_question, generate_quiz, generate_viva
 from prompts import NOT_FOUND
 from rag import NotesIndex, PDFReadError, chunk_pages, extract_pages, format_context, get_embedder
 
-LOGO = Path(__file__).parent / "assets" / "logo.png"
+ASSETS = Path(__file__).parent / "assets"
+LOGO = ASSETS / "logo.png"
 BEGIN_MESSAGE = "Upload and process your PDF notes in the sidebar to begin."
+
+# What each tab will do, shown before any notes are uploaded.
+TAB_PROMISES = {
+    "viva": "You'll get viva questions with key points, model answers and marks.",
+    "doubt": "Ask anything about your notes. Every answer names the page it came from.",
+    "quiz": "You'll get five multiple-choice questions and a score at the end.",
+}
+
+
+def load_css() -> None:
+    """Add our exam-paper styling (assets/style.css) on top of the Streamlit theme."""
+    css = (ASSETS / "style.css").read_text(encoding="utf-8")
+    st.html(f"<style>{css}</style>")
 
 
 @st.cache_resource(show_spinner="Loading the search model (first run downloads ~90 MB)…")
@@ -57,28 +73,39 @@ def show_error(error: Exception) -> None:
 # ---------------------------------------------------------------- header / footer
 
 def render_header() -> None:
-    """College name, department, course and the app title."""
+    """College name, department and course, laid out like the top of a question paper."""
+    logo = ""
     if LOGO.exists():
-        logo_col, text_col = st.columns([1, 8])
-        logo_col.image(str(LOGO), width=90)
-    else:
-        text_col = st.container()
-    with text_col:
-        st.markdown(f"### **{config.COLLEGE_NAME}**")
-        st.caption(f"{config.DEPARTMENT} · {config.COURSE}")
-    st.title("🎓 Viva Question Bot")
-    st.write(
-        "Upload your PDF notes. Practise viva questions, clear doubts and quiz yourself "
-        "— answers come only from your notes."
+        data = base64.b64encode(LOGO.read_bytes()).decode()
+        logo = f'<img src="data:image/png;base64,{data}" alt="">'
+    st.html(
+        f"""<div class="vb-masthead">{logo}<div>
+        <p class="vb-college">{escape(config.COLLEGE_NAME)}</p>
+        <p class="vb-dept">{escape(config.DEPARTMENT)} · {escape(config.COURSE)}</p>
+        </div></div>
+        <hr class="vb-rule">
+        <h1 class="vb-title">Viva Question Bot</h1>
+        <p class="vb-lede">Upload your PDF notes. Practise viva questions, clear doubts and quiz
+        yourself — answers come only from your notes.</p>"""
+    )
+
+
+def render_empty_state(tab: str) -> None:
+    """Friendly first screen for a tab, before any notes are processed."""
+    st.html(
+        f"""<div class="vb-empty"><h3>Start with your notes</h3>
+        <p>{BEGIN_MESSAGE} {TAB_PROMISES[tab]}</p>
+        <ol><li>Upload one or more PDF notes in the sidebar.</li>
+        <li>Click <b>Process notes</b>.</li>
+        <li>Come back to this tab.</li></ol></div>"""
     )
 
 
 def render_footer() -> None:
     """Small grey reminder at the bottom of every screen."""
-    st.divider()
-    st.caption(
-        "Answers come only from your uploaded notes. Always check the source. "
-        "Nothing you upload is saved."
+    st.html(
+        '<p class="vb-footer">Answers come only from your uploaded notes. Always check the source. '
+        "Nothing you upload is saved.</p>"
     )
 
 
@@ -129,7 +156,8 @@ def clear_all() -> None:
 def render_file_list() -> None:
     """Show each processed file, scanned-page warnings and overall stats."""
     for info in st.session_state.files_info:
-        st.markdown(f"📄 **{info['name']}** · {info['pages']} pages")
+        pages = f"{info['pages']} page" + ("s" if info["pages"] != 1 else "")
+        st.html(f'<div class="vb-file"><span>{escape(info["name"])}</span><span>{pages}</span></div>')
         if info["scanned"]:
             numbers = ", ".join(str(n) for n in info["scanned"])
             st.warning(
@@ -137,16 +165,14 @@ def render_file_list() -> None:
                 "and will be skipped."
             )
     stats = st.session_state.index.stats()
-    files_col, pages_col, chunks_col = st.columns(3)
-    files_col.metric("Files", stats["files"])
-    pages_col.metric("Pages", stats["pages"])
-    chunks_col.metric("Chunks", stats["chunks"])
+    cells = "".join(f"<div><b>{stats[k]}</b><span>{k}</span></div>" for k in ("files", "pages", "chunks"))
+    st.html(f'<div class="vb-stats">{cells}</div>')
 
 
 def render_sidebar() -> None:
     """Upload, process and clear notes."""
     with st.sidebar:
-        st.header("📚 Your notes")
+        st.header("Your notes")
         uploads = st.file_uploader(
             "Upload PDF notes",
             type=["pdf"],
@@ -184,25 +210,32 @@ def viva_to_text(viva: dict) -> str:
 def render_viva_cards(viva: dict) -> None:
     """One bordered card per question, with answers hidden in expanders."""
     if viva["note"]:
-        st.info(viva["note"])
+        st.html(f'<div class="vb-note">{escape(str(viva["note"]))}</div>')
     for n, q in enumerate(viva["questions"], start=1):
-        with st.container(border=True):
-            st.caption(f"Q{n} · {q['marks']} marks")
-            st.markdown(f"**{q['question']}**")
-            with st.expander("Show key points"):
+        # The key gives the card a CSS class (st-key-viva_card_N) that style.css styles.
+        with st.container(border=True, key=f"viva_card_{n}"):
+            # escape() stops text from the notes being treated as HTML.
+            st.html(
+                f"""<div class="vb-q"><span class="vb-qnum">Q{n}</span>
+                <p class="vb-qtext">{escape(q["question"])}</p>
+                <span class="vb-marks">[{q["marks"]} marks]</span></div>"""
+            )
+            with st.expander("Show key points", icon=":material/checklist:"):
                 st.markdown("\n".join(f"- {point}" for point in q["key_points"]))
-            with st.expander("Show model answer"):
+            with st.expander("Show model answer", icon=":material/menu_book:"):
                 st.write(q["model_answer"])
-                st.caption(f"Source: {q['source']}")
+                st.html(f'<p class="vb-source">Source: <b>{escape(q["source"])}</b></p>')
     if viva["questions"]:
-        st.download_button("Download as text", viva_to_text(viva), file_name="viva_questions.txt")
+        st.download_button(
+            "Download as text", viva_to_text(viva), file_name="viva_questions.txt", icon=":material/download:"
+        )
 
 
 def render_viva_tab() -> None:
     """Main feature: generate viva questions at a chosen difficulty."""
     difficulty = st.radio("Difficulty", ["easy", "medium", "hard"], horizontal=True)
     topic = st.text_input("Topic (optional)", placeholder="Leave empty to cover the whole document", key="viva_topic")
-    if st.button("Generate viva questions", type="primary"):
+    if st.button("Generate viva questions", type="primary", icon=":material/auto_awesome:"):
         chunks = st.session_state.index.sample_for_generation(topic, config.TOP_K_GENERATE)
         with st.spinner("Thinking…"):
             try:
@@ -218,7 +251,8 @@ def render_viva_tab() -> None:
 
 def render_message(message: dict) -> None:
     """Draw one chat bubble, with the retrieved chunks under assistant answers."""
-    with st.chat_message(message["role"]):
+    avatar = ":material/school:" if message["role"] == "assistant" else ":material/person:"
+    with st.chat_message(message["role"], avatar=avatar):
         if message["role"] == "assistant" and NOT_FOUND.rstrip(".") in message["content"]:
             st.info(message["content"])  # not an error: this is the bot being honest
         else:
@@ -265,7 +299,7 @@ def render_quiz_questions(quiz: list[dict]) -> int:
     """Show each question as radio buttons; after checking, mark it. Returns the score."""
     score = 0
     for n, q in enumerate(quiz, start=1):
-        with st.container(border=True):
+        with st.container(border=True, key=f"quiz_card_{n}"):
             choice = st.radio(
                 f"**Q{n}. {q['question']}**",
                 range(4),
@@ -277,17 +311,30 @@ def render_quiz_questions(quiz: list[dict]) -> int:
             if st.session_state.quiz_checked:
                 correct = choice == q["answer_index"]
                 score += correct
-                mark = "✅ Correct" if correct else "❌ Wrong"
-                st.markdown(f"{mark} — answer: **{q['options'][q['answer_index']]}**")
-                st.caption(f"{q['explanation']}  \nSource: {q['source']}")
+                verdict = ("right", "Correct") if correct else ("wrong", "Not quite")  # icons come from style.css
+                answer = escape(q["options"][q["answer_index"]])
+                st.html(
+                    f"""<p class="vb-verdict {verdict[0]}">{verdict[1]} · answer: {answer}</p>
+                    <p class="vb-explain">{escape(q["explanation"])}<br>Source: {escape(q["source"])}</p>"""
+                )
     return score
+
+
+def render_score(score: int, total: int) -> None:
+    """The score, circled in red ink like a marked answer sheet."""
+    remarks = {total: "Full marks!", 0: "Read the notes again and try a new quiz."}
+    remark = remarks.get(score, "Check the explanations above for the ones you missed.")
+    st.html(
+        f"""<div class="vb-score"><span class="vb-score-ring">{score}/{total}</span>
+        <span class="vb-score-label">Your score<small>{remark}</small></span></div>"""
+    )
 
 
 def render_quiz_tab() -> None:
     """Make a 5-question multiple-choice quiz and score it."""
     if st.session_state.quiz is None:
         topic = st.text_input("Topic (optional)", placeholder="Leave empty to cover the whole document", key="quiz_topic")
-        if st.button("Make a quiz", type="primary"):
+        if st.button("Make a quiz", type="primary", icon=":material/quiz:"):
             chunks = st.session_state.index.sample_for_generation(topic, config.TOP_K_GENERATE)
             with st.spinner("Thinking…"):
                 try:
@@ -300,16 +347,16 @@ def render_quiz_tab() -> None:
         return
     quiz = st.session_state.quiz
     score = render_quiz_questions(quiz)
-    check_col, new_col = st.columns([1, 1])
-    if not st.session_state.quiz_checked:
-        if check_col.button("Check answers", type="primary"):
-            st.session_state.quiz_checked = True
+    if st.session_state.quiz_checked:
+        render_score(score, len(quiz))
+    with st.container(horizontal=True):
+        if not st.session_state.quiz_checked:
+            if st.button("Check answers", type="primary", icon=":material/done_all:"):
+                st.session_state.quiz_checked = True
+                st.rerun()
+        if st.button("New quiz", icon=":material/refresh:"):
+            new_quiz()
             st.rerun()
-    else:
-        st.subheader(f"Score: {score} / {len(quiz)}")
-    if new_col.button("New quiz"):
-        new_quiz()
-        st.rerun()
 
 
 # ---------------------------------------------------------------- main
@@ -317,16 +364,20 @@ def render_quiz_tab() -> None:
 def main() -> None:
     """Build the whole page."""
     st.set_page_config(page_title="Viva Question Bot", page_icon="🎓", layout="wide")
+    load_css()
     init_state()
     render_header()
     render_sidebar()
-    viva_tab, doubt_tab, quiz_tab = st.tabs(["🎤 Viva questions", "💬 Ask a doubt", "📝 Quiz me"])
-    for tab, render in [(viva_tab, render_viva_tab), (doubt_tab, render_doubt_tab), (quiz_tab, render_quiz_tab)]:
+    tabs = st.tabs(
+        [":material/record_voice_over: Viva questions", ":material/forum: Ask a doubt", ":material/quiz: Quiz me"]
+    )
+    renderers = {"viva": render_viva_tab, "doubt": render_doubt_tab, "quiz": render_quiz_tab}
+    for tab, (name, render) in zip(tabs, renderers.items()):
         with tab:
             if notes_ready():
                 render()
             else:
-                st.info(BEGIN_MESSAGE)
+                render_empty_state(name)
     render_footer()
 
 

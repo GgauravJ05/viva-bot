@@ -1,9 +1,27 @@
+# Look and feel: an exam paper. Warm paper, ink-blue text, red-ink marks.
+# Light on purpose: classroom projectors wash out dark themes.
 [theme]
-primaryColor = "#3D5AFE"
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#EEF1F8"
-textColor = "#141B3D"
-font = "sans serif"
+base = "light"
+primaryColor = "#2B3A8C"            # ink blue: buttons, links, focus
+backgroundColor = "#FBF8F2"         # paper
+secondaryBackgroundColor = "#F2EDE2"
+textColor = "#1B2340"               # ink
+borderColor = "#E2DACA"
+linkColor = "#2B3A8C"
+baseRadius = "0.6rem"
+baseFontSize = 17                   # a little larger so the back row can read it
+font = "Instrument Sans:https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap"
+headingFont = "Fraunces:https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap"
+
+[theme.sidebar]
+backgroundColor = "#F3EEE3"
+secondaryBackgroundColor = "#FBF8F2"
+
+[client]
+toolbarMode = "minimal"             # hide developer menus during the demo
 
 [server]
 maxUploadSize = 20
+# No auto-reload on file edits. The watcher scans the huge transformers
+# library and floods the terminal with harmless torchvision errors.
+fileWatcherType = "none"
