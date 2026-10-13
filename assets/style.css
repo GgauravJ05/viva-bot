@@ -140,3 +140,19 @@
 
 /* ---------- footer ---------- */
 .vb-footer { border-top: 1px solid var(--rule); margin-top: 3rem; padding-top: 1rem; color: var(--ink-soft); font-size: 0.85rem; }
+
+/* ---------- teaching mode (sidebar toggle) ----------
+   Uses the Unit 2 slide colours on purpose, so the badges read as
+   "lecture notes on top of the app", not part of the app itself. */
+.vb-teach-row { display: flex; flex-direction: column; gap: 0.35rem; margin: 0.1rem 0 0.9rem; }
+.vb-teach {
+  margin: 0; font-size: 0.9rem; line-height: 1.45; color: #141B3D;
+  background: #EEF1F8; border-radius: 0.5rem; padding: 0.45rem 0.75rem;
+}
+.vb-teach b {
+  display: inline-block; background: #3D5AFE; color: #fff; font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.05em; text-transform: uppercase; border-radius: 999px;
+  padding: 0.12rem 0.55rem; margin-right: 0.55rem; vertical-align: 0.08em;
+}
+.vb-teach.warn b { background: #E5484D; }
+.vb-teach code { font-family: "Roboto Mono", ui-monospace, monospace; font-size: 0.85em; background: #fff; padding: 0 0.25em; border-radius: 0.25rem; }

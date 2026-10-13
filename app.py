@@ -70,6 +70,21 @@ def show_error(error: Exception) -> None:
         st.error("Something went wrong. Please try again.")
 
 
+MARKS = {"easy": 2, "medium": 3, "hard": 5}  # the marks rule in VIVA_PROMPT
+
+
+def teach(*badges: tuple[str, str]) -> None:
+    """Teaching mode: show which Unit 2 idea is at work, as (label, text) badges.
+    Text may contain <code> tags; everything else is plain text. Off by default."""
+    if not st.session_state.get("teaching_mode"):
+        return
+    rows = []
+    for label, text in badges:
+        kind = "warn" if label.startswith(("L3 · Halluc", "Bias")) else ""
+        rows.append(f'<p class="vb-teach {kind}"><b>{label}</b>{text}</p>')
+    st.html(f'<div class="vb-teach-row">{"".join(rows)}</div>')
+
+
 # ---------------------------------------------------------------- header / footer
 
 def render_header() -> None:
@@ -187,9 +202,16 @@ def render_sidebar() -> None:
                     show_error(error)
         if notes_ready():
             render_file_list()
+            teach(("RAG", "Retrieve, then generate: only the chunks that match a request go to the AI."))
         if st.button("Clear all notes", use_container_width=True):
             clear_all()
             st.rerun()
+        st.divider()
+        st.toggle(
+            "Teaching mode",
+            key="teaching_mode",
+            help="Show which Unit 2 idea is at work above each output. For classroom demos.",
+        )
 
 
 # ---------------------------------------------------------------- tab 1: viva
@@ -207,8 +229,24 @@ def viva_to_text(viva: dict) -> str:
     return "\n".join(lines)
 
 
+def teach_viva(viva: dict) -> None:
+    """Teaching-mode badges for the viva tab: the Lecture 4 lab checklist."""
+    difficulty = viva["difficulty"]
+    badges = [
+        ("L2 · Role", "The prompt starts: <i>“You are a strict but fair viva examiner.”</i>"),
+        ("L4 · Template", f"<code>{{difficulty}}</code> was filled with “{difficulty}”, so each question is worth {MARKS[difficulty]} marks."),
+        ("L2 · Delimiting", "Your notes are inside <code>&lt;notes&gt;</code> tags: study material, never instructions."),
+        ("L4 · Chain-of-Thought", "Key points are written first, then the model answer."),
+        ("L2 · JSON", "The AI replied in JSON; the app turned it into these cards."),
+    ]
+    if viva.get("topic"):
+        badges.insert(1, ("RAG", f"The topic “{escape(viva['topic'])}” chose which chunks were retrieved."))
+    teach(*badges)
+
+
 def render_viva_cards(viva: dict) -> None:
     """One bordered card per question, with answers hidden in expanders."""
+    teach_viva(viva)
     if viva["note"]:
         st.html(f'<div class="vb-note">{escape(str(viva["note"]))}</div>')
     for n, q in enumerate(viva["questions"], start=1):
@@ -240,7 +278,9 @@ def render_viva_tab() -> None:
         with st.spinner("Thinking…"):
             try:
                 questions, note = generate_viva(format_context(chunks), difficulty)
-                st.session_state.viva = {"questions": questions, "note": note, "difficulty": difficulty}
+                st.session_state.viva = {
+                    "questions": questions, "note": note, "difficulty": difficulty, "topic": topic.strip()
+                }
             except Exception as error:
                 show_error(error)
     if st.session_state.viva:
@@ -252,10 +292,14 @@ def render_viva_tab() -> None:
 def render_message(message: dict) -> None:
     """Draw one chat bubble, with the retrieved chunks under assistant answers."""
     avatar = ":material/school:" if message["role"] == "assistant" else ":material/person:"
+    not_found = message["role"] == "assistant" and NOT_FOUND.rstrip(".") in message["content"]
     with st.chat_message(message["role"], avatar=avatar):
-        if message["role"] == "assistant" and NOT_FOUND.rstrip(".") in message["content"]:
+        if not_found:
+            teach(("L3 · Hallucination", "The prompt allows “not found”, so the bot admits it instead of guessing."))
             st.info(message["content"])  # not an error: this is the bot being honest
         else:
+            if message["role"] == "assistant":
+                teach(("L3 · Grounding", "Answered only from the <code>&lt;context&gt;</code>, with [file, p.X] citations. Check Sources used."))
             st.markdown(message["content"])
         if message.get("sources"):
             with st.expander("Sources used"):
@@ -346,8 +390,13 @@ def render_quiz_tab() -> None:
             st.rerun()  # redraw so the quiz replaces the topic box
         return
     quiz = st.session_state.quiz
+    teach(
+        ("L1 · In-context learning", "The AI copied the JSON format example shown in the prompt."),
+        ("Bias fix", "Options are shuffled in code, so the right answer isn't always A (L1: examples can bias answers)."),
+    )
     score = render_quiz_questions(quiz)
     if st.session_state.quiz_checked:
+        teach(("L3 · Accuracy", f"Correct ÷ total × 100 = {score} ÷ {len(quiz)} × 100 = {round(100 * score / len(quiz))}%"))
         render_score(score, len(quiz))
     with st.container(horizontal=True):
         if not st.session_state.quiz_checked:
