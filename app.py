@@ -42,13 +42,13 @@ def load_embedder():
 def init_state() -> None:
     """Create the session variables the first time the page loads."""
     defaults = {
-        "index": None,        # NotesIndex, kept so we never re-embed on a rerun
-        "files_info": [],     # [{"name", "pages", "scanned"}] for the sidebar list
-        "viva": None,         # {"questions", "note", "difficulty"}
-        "messages": [],       # Ask-a-doubt chat history for this session
-        "quiz": None,         # list of quiz questions
+        "index": None,  # NotesIndex, kept so we never re-embed on a rerun
+        "files_info": [],  # [{"name", "pages", "scanned"}] for the sidebar list
+        "viva": None,  # {"questions", "note", "difficulty"}
+        "messages": [],  # Ask-a-doubt chat history for this session
+        "quiz": None,  # list of quiz questions
         "quiz_checked": False,
-        "quiz_round": 0,      # changes the radio keys so a new quiz starts blank
+        "quiz_round": 0,  # changes the radio keys so a new quiz starts blank
         "uploader_round": 0,  # changes the uploader key so "Clear" empties it
     }
     for key, value in defaults.items():
@@ -86,6 +86,7 @@ def teach(*badges: tuple[str, str]) -> None:
 
 # ---------------------------------------------------------------- header / footer
 
+
 def render_header() -> None:
     """The college banner (assets/college_banner.png), then the app title."""
     if BANNER.exists():
@@ -121,6 +122,7 @@ def render_footer() -> None:
 
 
 # ---------------------------------------------------------------- sidebar
+
 
 def process_notes(uploads: list) -> None:
     """Extract, chunk and index the uploaded PDFs into a fresh index."""
@@ -171,10 +173,7 @@ def render_file_list() -> None:
         st.html(f'<div class="vb-file"><span>{escape(info["name"])}</span><span>{pages}</span></div>')
         if info["scanned"]:
             numbers = ", ".join(str(n) for n in info["scanned"])
-            st.warning(
-                f"Pages {numbers} have no readable text — they may be scanned images "
-                "and will be skipped."
-            )
+            st.warning(f"Pages {numbers} have no readable text — they may be scanned images and will be skipped.")
     stats = st.session_state.index.stats()
     cells = "".join(f"<div><b>{stats[k]}</b><span>{k}</span></div>" for k in ("files", "pages", "chunks"))
     st.html(f'<div class="vb-stats">{cells}</div>')
@@ -212,6 +211,7 @@ def render_sidebar() -> None:
 
 # ---------------------------------------------------------------- tab 1: viva
 
+
 def viva_to_text(viva: dict) -> str:
     """Plain-text version of the viva questions for the download button."""
     lines = [f"Viva questions ({viva['difficulty']})", ""]
@@ -230,8 +230,14 @@ def teach_viva(viva: dict) -> None:
     difficulty = viva["difficulty"]
     badges = [
         ("L2 · Role", "The prompt starts: <i>“You are a strict but fair viva examiner.”</i>"),
-        ("L4 · Template", f"<code>{{difficulty}}</code> was filled with “{difficulty}”, so each question is worth {MARKS[difficulty]} marks."),
-        ("L2 · Delimiting", "Your notes are inside <code>&lt;notes&gt;</code> tags: study material, never instructions."),
+        (
+            "L4 · Template",
+            f"<code>{{difficulty}}</code> was filled with “{difficulty}”, so each question is worth {MARKS[difficulty]} marks.",
+        ),
+        (
+            "L2 · Delimiting",
+            "Your notes are inside <code>&lt;notes&gt;</code> tags: study material, never instructions.",
+        ),
         ("L4 · Chain-of-Thought", "Key points are written first, then the model answer."),
         ("L2 · JSON", "The AI replied in JSON; the app turned it into these cards."),
     ]
@@ -275,7 +281,10 @@ def render_viva_tab() -> None:
             try:
                 questions, note = generate_viva(format_context(chunks), difficulty)
                 st.session_state.viva = {
-                    "questions": questions, "note": note, "difficulty": difficulty, "topic": topic.strip()
+                    "questions": questions,
+                    "note": note,
+                    "difficulty": difficulty,
+                    "topic": topic.strip(),
                 }
             except Exception as error:
                 show_error(error)
@@ -284,6 +293,7 @@ def render_viva_tab() -> None:
 
 
 # ---------------------------------------------------------------- tab 2: ask a doubt
+
 
 def render_message(message: dict) -> None:
     """Draw one chat bubble, with the retrieved chunks under assistant answers."""
@@ -295,7 +305,12 @@ def render_message(message: dict) -> None:
             st.info(message["content"])  # not an error: this is the bot being honest
         else:
             if message["role"] == "assistant":
-                teach(("L3 · Grounding", "Answered only from the <code>&lt;context&gt;</code>, with [file, p.X] citations. Check Sources used."))
+                teach(
+                    (
+                        "L3 · Grounding",
+                        "Answered only from the <code>&lt;context&gt;</code>, with [file, p.X] citations. Check Sources used.",
+                    )
+                )
             st.markdown(message["content"])
         if message.get("sources"):
             with st.expander("Sources used"):
@@ -327,6 +342,7 @@ def render_doubt_tab() -> None:
 
 
 # ---------------------------------------------------------------- tab 3: quiz
+
 
 def new_quiz() -> None:
     """Forget the current quiz and start the radios fresh next time."""
@@ -373,7 +389,9 @@ def render_score(score: int, total: int) -> None:
 def render_quiz_tab() -> None:
     """Make a 5-question multiple-choice quiz and score it."""
     if st.session_state.quiz is None:
-        topic = st.text_input("Topic (optional)", placeholder="Leave empty to cover the whole document", key="quiz_topic")
+        topic = st.text_input(
+            "Topic (optional)", placeholder="Leave empty to cover the whole document", key="quiz_topic"
+        )
         if st.button("Make a quiz", type="primary", icon=":material/quiz:"):
             chunks = st.session_state.index.sample_for_generation(topic, config.TOP_K_GENERATE)
             with st.spinner("Thinking…"):
@@ -388,11 +406,19 @@ def render_quiz_tab() -> None:
     quiz = st.session_state.quiz
     teach(
         ("L1 · In-context learning", "The AI copied the JSON format example shown in the prompt."),
-        ("Bias fix", "Options are shuffled in code, so the right answer isn't always A (L1: examples can bias answers)."),
+        (
+            "Bias fix",
+            "Options are shuffled in code, so the right answer isn't always A (L1: examples can bias answers).",
+        ),
     )
     score = render_quiz_questions(quiz)
     if st.session_state.quiz_checked:
-        teach(("L3 · Accuracy", f"Correct ÷ total × 100 = {score} ÷ {len(quiz)} × 100 = {round(100 * score / len(quiz))}%"))
+        teach(
+            (
+                "L3 · Accuracy",
+                f"Correct ÷ total × 100 = {score} ÷ {len(quiz)} × 100 = {round(100 * score / len(quiz))}%",
+            )
+        )
         render_score(score, len(quiz))
     with st.container(horizontal=True):
         if not st.session_state.quiz_checked:
@@ -405,6 +431,7 @@ def render_quiz_tab() -> None:
 
 
 # ---------------------------------------------------------------- main
+
 
 def main() -> None:
     """Build the whole page."""

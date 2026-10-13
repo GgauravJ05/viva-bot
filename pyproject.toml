@@ -1,0 +1,8 @@
+# Tool settings only (this project is not a package).
+# Format the code with:  ruff format .     Check it with:  ruff check .
+
+[tool.ruff]
+line-length = 120
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

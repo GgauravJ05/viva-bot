@@ -20,10 +20,10 @@ MODEL = os.getenv("MODEL", "")
 COLLEGE_NAME = os.getenv("COLLEGE_NAME", "My College")
 
 # --- RAG settings ---
-CHUNK_SIZE = 800        # characters: small enough to be specific, big enough to hold a full idea
-CHUNK_OVERLAP = 100     # characters: a sentence cut at a boundary still appears whole in one chunk
-TOP_K_QA = 4            # chunks retrieved for "Ask a doubt"
-TOP_K_GENERATE = 6      # chunks used for viva and quiz generation
+CHUNK_SIZE = 800  # characters: small enough to be specific, big enough to hold a full idea
+CHUNK_OVERLAP = 100  # characters: a sentence cut at a boundary still appears whole in one chunk
+TOP_K_QA = 4  # chunks retrieved for "Ask a doubt"
+TOP_K_GENERATE = 6  # chunks used for viva and quiz generation
 EMBED_MODEL = "all-MiniLM-L6-v2"  # small (~90 MB) embedding model that runs on a CPU
 
 # --- Demo limits ---

@@ -31,6 +31,7 @@ QUIZ_ITEM = {
 
 # --- Prompts ---
 
+
 def test_prompts_format_without_errors():
     qa = QA_PROMPT.format(college="MES", context="[Source: a.pdf, p.1]\nText", question="Why?")
     viva = VIVA_PROMPT.format(difficulty="hard", context="notes")
@@ -43,6 +44,7 @@ def test_prompts_format_without_errors():
 
 
 # --- Fence stripping and parsing ---
+
 
 def test_parse_plain_json():
     assert parse_json_reply('[{"a": 1}]') == [{"a": 1}]
@@ -62,6 +64,7 @@ def test_parse_rejects_invalid_json():
 
 
 # --- chat_json retry behaviour ---
+
 
 def test_chat_json_retries_once_then_succeeds(monkeypatch):
     replies = iter(["not json", '[{"a": 1}]'])
@@ -84,6 +87,7 @@ def test_missing_key_gives_friendly_error(monkeypatch):
 
 
 # --- Viva validation ---
+
 
 def test_viva_valid_list():
     questions, note = validate_viva([VIVA_ITEM, VIVA_ITEM])
@@ -113,6 +117,7 @@ def test_viva_note_as_object():
 
 # --- Quiz validation ---
 
+
 def test_quiz_valid():
     assert validate_quiz([QUIZ_ITEM] * 5) == [QUIZ_ITEM] * 5
 
@@ -121,9 +126,9 @@ def test_quiz_valid():
     "change",
     [
         {"options": ["A", "B", "C"]},  # only 3 options
-        {"answer_index": 4},           # out of range
-        {"answer_index": "1"},         # string, not int
-        {"answer_index": True},        # bool sneaks through isinstance(int)
+        {"answer_index": 4},  # out of range
+        {"answer_index": "1"},  # string, not int
+        {"answer_index": True},  # bool sneaks through isinstance(int)
         {"explanation": None},
     ],
 )
@@ -138,6 +143,7 @@ def test_quiz_must_be_a_list():
 
 
 # --- Quiz option shuffling (fixes the "always option A" bias) ---
+
 
 def test_shuffle_keeps_the_correct_answer_text():
     quiz = [{**QUIZ_ITEM, "options": ["right", "w1", "w2", "w3"], "answer_index": 0}] * 20
