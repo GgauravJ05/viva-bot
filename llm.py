@@ -6,6 +6,7 @@ in the .env file: the code stays the same.
 """
 
 import json
+import random
 import re
 import time
 
@@ -148,6 +149,23 @@ def validate_quiz(data: list | dict) -> list[dict]:
     return data
 
 
+def shuffle_options(quiz: list[dict], rng: random.Random | None = None) -> list[dict]:
+    """Move each correct answer to a random position.
+
+    QUIZ_PROMPT's format example shows "answer_index": 0, and the model sometimes
+    copies it, putting every right answer in option A. That is the few-shot bias
+    from Lecture 1. Shuffling in code guarantees the answer moves around.
+    """
+    rng = rng or random.Random()
+    shuffled = []
+    for q in quiz:
+        order = list(range(4))
+        rng.shuffle(order)
+        options = [q["options"][i] for i in order]
+        shuffled.append({**q, "options": options, "answer_index": order.index(q["answer_index"])})
+    return shuffled
+
+
 # --- The three features, each one prompt + one call ---
 
 def answer_question(context: str, question: str) -> str:
@@ -161,5 +179,5 @@ def generate_viva(context: str, difficulty: str) -> tuple[list[dict], str | None
 
 
 def generate_quiz(context: str) -> list[dict]:
-    """Quiz me: returns 5 multiple-choice questions."""
-    return validate_quiz(chat_json(QUIZ_PROMPT.format(context=context)))
+    """Quiz me: returns 5 multiple-choice questions, with the options shuffled."""
+    return shuffle_options(validate_quiz(chat_json(QUIZ_PROMPT.format(context=context))))

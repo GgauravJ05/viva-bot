@@ -8,7 +8,9 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import llm  # noqa: E402
-from llm import LLMError, parse_json_reply, validate_quiz, validate_viva  # noqa: E402
+import random  # noqa: E402
+
+from llm import LLMError, parse_json_reply, shuffle_options, validate_quiz, validate_viva  # noqa: E402
 from prompts import QA_PROMPT, QUIZ_PROMPT, VIVA_PROMPT  # noqa: E402
 
 VIVA_ITEM = {
@@ -133,3 +135,24 @@ def test_quiz_bad_items_are_rejected(change):
 def test_quiz_must_be_a_list():
     with pytest.raises(LLMError):
         validate_quiz({"questions": [QUIZ_ITEM]})
+
+
+# --- Quiz option shuffling (fixes the "always option A" bias) ---
+
+def test_shuffle_keeps_the_correct_answer_text():
+    quiz = [{**QUIZ_ITEM, "options": ["right", "w1", "w2", "w3"], "answer_index": 0}] * 20
+    for q in shuffle_options(quiz, random.Random(1)):
+        assert q["options"][q["answer_index"]] == "right"
+        assert sorted(q["options"]) == ["right", "w1", "w2", "w3"]
+
+
+def test_shuffle_spreads_answers_across_positions():
+    quiz = [{**QUIZ_ITEM, "answer_index": 0}] * 40  # the biased case: every answer is A
+    positions = {q["answer_index"] for q in shuffle_options(quiz, random.Random(7))}
+    assert positions == {0, 1, 2, 3}
+
+
+def test_shuffle_does_not_change_the_input():
+    quiz = [dict(QUIZ_ITEM)]
+    shuffle_options(quiz, random.Random(3))
+    assert quiz[0] == QUIZ_ITEM
