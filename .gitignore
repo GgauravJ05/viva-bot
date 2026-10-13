@@ -1,5 +1,19 @@
+# Secrets: your API key lives here. Never commit it.
 .env
-__pycache__/
+.env.*
+!.env.example
+
+# Python
 .venv/
+__pycache__/
+*.pyc
 .pytest_cache/
+.ruff_cache/
+
+# Editors and OS
+.vscode/
+.idea/
 .DS_Store
+
+# Teacher's private notes (video script, build plan)
+.docs/

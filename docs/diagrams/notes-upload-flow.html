@@ -135,13 +135,13 @@
     <table>
       <thead><tr><th>Step</th><th>What happens</th><th>File : line</th></tr></thead>
       <tbody>
-        <tr><td>0</td><td>The student uploads PDFs and clicks <b>Process notes</b>. The app first checks the limits (max 5 files, 150 pages).</td><td>app.py:193 → 125 · 127 · 136</td></tr>
-        <tr><td>1–2</td><td><code>extract_pages</code> reads each page's text with pypdf, keeps its page number, and flags empty (scanned) pages.</td><td>app.py:132 → rag.py:39</td></tr>
-        <tr><td>3–4</td><td><code>chunk_pages</code> cuts each page into ~800-character chunks with 100 characters of overlap. Chunks never cross a page, so each has one page number to cite.</td><td>app.py:143 → rag.py:74</td></tr>
-        <tr><td>5</td><td>A new in-memory <code>NotesIndex</code> is created and the chunks are added.</td><td>app.py:142–143 → rag.py:131</td></tr>
+        <tr><td>0</td><td>The student uploads PDFs and clicks <b>Process notes</b>. The app first checks the limits (max 5 files, 150 pages).</td><td>app.py:192 → 127 · 129 · 138</td></tr>
+        <tr><td>1–2</td><td><code>extract_pages</code> reads each page's text with pypdf, keeps its page number, and flags empty (scanned) pages.</td><td>app.py:134 → rag.py:39</td></tr>
+        <tr><td>3–4</td><td><code>chunk_pages</code> cuts each page into ~800-character chunks with 100 characters of overlap. Chunks never cross a page, so each has one page number to cite.</td><td>app.py:145 → rag.py:74</td></tr>
+        <tr><td>5</td><td>A new in-memory <code>NotesIndex</code> is created and the chunks are added.</td><td>app.py:144–145 → rag.py:131</td></tr>
         <tr class="focal"><td>6–7</td><td><code>embedder.encode</code> turns every chunk into a vector: 384 numbers that capture its meaning. Model <code>all-MiniLM-L6-v2</code>, running on the laptop.</td><td>rag.py:135</td></tr>
         <tr><td>8–9</td><td><code>collection.add</code> stores each vector in Chroma with its text, file name and page number.</td><td>rag.py:136</td></tr>
-        <tr><td>10–11</td><td>The index is kept in the session, and the sidebar shows files · pages · chunks.</td><td>app.py:145 · 167</td></tr>
+        <tr><td>10–11</td><td>The index is kept in the session, and the sidebar shows files · pages · chunks.</td><td>app.py:147 · 169</td></tr>
       </tbody>
     </table>
     <p class="note">Nothing is written to disk. Close the app and the index is gone.</p>

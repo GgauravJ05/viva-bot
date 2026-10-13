@@ -1,8 +1,8 @@
 """The ONE place in the app that talks to the LLM.
 
-We use the OpenAI Python SDK, but point it at Google Gemini's
-OpenAI-compatible endpoint (or Groq's). Switching provider is only a change
-in the .env file: the code stays the same.
+We use the OpenAI Python SDK, but point it at Groq's OpenAI-compatible
+endpoint (or Google Gemini's). Switching provider is only a change in the
+.env file: the code stays the same.
 """
 
 import json
@@ -22,7 +22,7 @@ class LLMError(Exception):
 
 BUSY_MESSAGE = (
     "The AI service is busy, or the free limit is used up. Wait a minute and try again. "
-    "If it keeps happening, switch to the Groq backup in .env."
+    "You are not charged when this happens."
 )
 FORMAT_MESSAGE = "The AI did not return the expected format. Try again."
 JSON_RETRY_SUFFIX = "\n\nYour previous reply was not valid JSON. Reply again with ONLY valid JSON."
@@ -167,6 +167,7 @@ def shuffle_options(quiz: list[dict], rng: random.Random | None = None) -> list[
 
 
 # --- The three features, each one prompt + one call ---
+
 
 def answer_question(context: str, question: str) -> str:
     """Ask a doubt: answer from the notes only, with citations."""

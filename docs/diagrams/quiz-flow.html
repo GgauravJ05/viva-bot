@@ -145,15 +145,15 @@
     <table>
       <thead><tr><th>Step</th><th>What happens</th><th>File : line</th></tr></thead>
       <tbody>
-        <tr><td>0</td><td>The student types an optional topic and clicks <b>Make a quiz</b>.</td><td>app.py:376–377</td></tr>
-        <tr><td>1–2</td><td><code>sample_for_generation(topic, 6)</code>: with a topic it <b>searches</b> by meaning (MiniLM + Chroma); without one it picks 6 chunks spread across the notes. This is the R in RAG.</td><td>app.py:378 → rag.py:153</td></tr>
-        <tr><td>3–4</td><td><code>format_context</code> puts <code>[Source: file, p.X]</code> above every chunk, which is how the AI can cite pages.</td><td>app.py:381 → rag.py:94</td></tr>
-        <tr><td>5</td><td><code>generate_quiz(notes)</code> hands the labelled notes to llm.py.</td><td>app.py:381 → llm.py:181</td></tr>
-        <tr><td>6–7</td><td><code>QUIZ_PROMPT.format(context=notes)</code>: the template from prompts.py gets its blank filled. The notes go inside <code>&lt;notes&gt;</code> tags.</td><td>llm.py:183 · prompts.py:55</td></tr>
+        <tr><td>0</td><td>The student types an optional topic and clicks <b>Make a quiz</b>.</td><td>app.py:391–395</td></tr>
+        <tr><td>1–2</td><td><code>sample_for_generation(topic, 6)</code>: with a topic it <b>searches</b> by meaning (MiniLM + Chroma); without one it picks 6 chunks spread across the notes. This is the R in RAG.</td><td>app.py:396 → rag.py:153</td></tr>
+        <tr><td>3–4</td><td><code>format_context</code> puts <code>[Source: file, p.X]</code> above every chunk, which is how the AI can cite pages.</td><td>app.py:399 → rag.py:94</td></tr>
+        <tr><td>5</td><td><code>generate_quiz(notes)</code> hands the labelled notes to llm.py.</td><td>app.py:399 → llm.py:182</td></tr>
+        <tr><td>6–7</td><td><code>QUIZ_PROMPT.format(context=notes)</code>: the template from prompts.py gets its blank filled. The notes go inside <code>&lt;notes&gt;</code> tags.</td><td>llm.py:184 · prompts.py:55</td></tr>
         <tr class="focal"><td>8–9</td><td><code>client.chat.completions.create(...)</code>: <b>the only place the app talks to the AI.</b> One user message, temperature 0.2. The AI replies with JSON text.</td><td>llm.py:53</td></tr>
         <tr><td>10</td><td><code>chat_json</code> reads the JSON (asks once more if it's broken), <code>validate_quiz</code> checks 5 questions × 4 options, and <code>shuffle_options</code> moves each right answer to a random position.</td><td>llm.py:78 · 131 · 152</td></tr>
-        <tr><td>11</td><td>Five checked questions go back to app.py and are stored in the session.</td><td>app.py:385</td></tr>
-        <tr><td>12</td><td>Each question is shown as radio buttons; <b>Check answers</b> marks them and shows the score. No AI call is needed for marking.</td><td>app.py:338 · 399 · 363</td></tr>
+        <tr><td>11</td><td>Five checked questions go back to app.py and are stored in the session.</td><td>app.py:403</td></tr>
+        <tr><td>12</td><td>Each question is shown as radio buttons; <b>Check answers</b> marks them and shows the score. No AI call is needed for marking.</td><td>app.py:354 · 425 · 379</td></tr>
       </tbody>
     </table>
     <p class="note">If the AI is busy (rate limit), llm.py waits 5 seconds and tries once more before showing a friendly error. Line numbers match the code as of 14 Oct 2026; if the code changes, search for the function name.</p>
