@@ -16,10 +16,8 @@ API_KEY = os.getenv("API_KEY", "")
 BASE_URL = os.getenv("BASE_URL", "")
 MODEL = os.getenv("MODEL", "")
 
-# --- Names shown in the app header ---
+# --- College name: used in the "Ask a doubt" prompt, and in the header if there is no banner image ---
 COLLEGE_NAME = os.getenv("COLLEGE_NAME", "My College")
-DEPARTMENT = os.getenv("DEPARTMENT", "Department of Computer Engineering")
-COURSE = os.getenv("COURSE", "Prompt Engineering")
 
 # --- RAG settings ---
 CHUNK_SIZE = 800        # characters: small enough to be specific, big enough to hold a full idea

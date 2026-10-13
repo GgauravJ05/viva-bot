@@ -22,14 +22,13 @@
 
 .block-container { padding-top: 2.2rem; max-width: 1100px; }
 
-/* ---------- masthead (like the top of a question paper) ---------- */
-.vb-masthead { display: flex; gap: 1.25rem; align-items: center; }
-.vb-masthead img { width: 72px; height: 72px; object-fit: contain; }
+/* ---------- masthead: college banner, double rule, title ---------- */
+/* The college banner image: soft corners so its light panel sits nicely on the paper. */
+[data-testid="stImage"] img { border-radius: 0.6rem; }
 .vb-college {
   font-family: var(--serif); font-weight: 700; font-size: 1.35rem;
   letter-spacing: -0.01em; color: var(--ink); margin: 0; line-height: 1.2;
 }
-.vb-dept { color: var(--ink-soft); font-size: 0.92rem; margin: 0.2rem 0 0; }
 /* The double rule printed under an exam paper's header. */
 .vb-rule { border: 0; border-top: 3px double var(--ink); margin: 1rem 0 1.6rem; opacity: 0.85; }
 .vb-title {

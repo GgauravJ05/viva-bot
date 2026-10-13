@@ -5,7 +5,6 @@ live in rag.py; talking to the LLM lives in llm.py.
 Run with:  streamlit run app.py
 """
 
-import base64
 from html import escape
 from pathlib import Path
 
@@ -17,7 +16,7 @@ from prompts import NOT_FOUND
 from rag import NotesIndex, PDFReadError, chunk_pages, extract_pages, format_context, get_embedder
 
 ASSETS = Path(__file__).parent / "assets"
-LOGO = ASSETS / "logo.png"
+BANNER = ASSETS / "college_banner.png"  # header image; delete it to show the college name instead
 BEGIN_MESSAGE = "Upload and process your PDF notes in the sidebar to begin."
 
 # What each tab will do, shown before any notes are uploaded.
@@ -88,17 +87,14 @@ def teach(*badges: tuple[str, str]) -> None:
 # ---------------------------------------------------------------- header / footer
 
 def render_header() -> None:
-    """College name, department and course, laid out like the top of a question paper."""
-    logo = ""
-    if LOGO.exists():
-        data = base64.b64encode(LOGO.read_bytes()).decode()
-        logo = f'<img src="data:image/png;base64,{data}" alt="">'
+    """The college banner (assets/college_banner.png), then the app title."""
+    if BANNER.exists():
+        st.image(str(BANNER), width=560)
+    else:
+        # No banner image: fall back to the college name from .env.
+        st.html(f'<p class="vb-college">{escape(config.COLLEGE_NAME)}</p>')
     st.html(
-        f"""<div class="vb-masthead">{logo}<div>
-        <p class="vb-college">{escape(config.COLLEGE_NAME)}</p>
-        <p class="vb-dept">{escape(config.DEPARTMENT)} · {escape(config.COURSE)}</p>
-        </div></div>
-        <hr class="vb-rule">
+        """<hr class="vb-rule">
         <h1 class="vb-title">Viva Question Bot</h1>
         <p class="vb-lede">Upload your PDF notes. Practise viva questions, clear doubts and quiz
         yourself — answers come only from your notes.</p>"""

@@ -37,7 +37,7 @@ pip install -r requirements.txt
 
 **Get a Gemini key:** go to [Google AI Studio](https://aistudio.google.com/apikey), sign in, and click **Create API key**.
 
-**Create your `.env` file:** copy `.env.example` to `.env`, then paste your key after `API_KEY=`. You can also change `COLLEGE_NAME`, `DEPARTMENT` and `COURSE` there; they appear in the app header.
+**Create your `.env` file:** copy `.env.example` to `.env`, then paste your key after `API_KEY=`. You can also change `COLLEGE_NAME` there.
 
 ```bash
 cp .env.example .env               # Windows: copy .env.example .env
@@ -45,7 +45,7 @@ cp .env.example .env               # Windows: copy .env.example .env
 
 Never share or commit your `.env` file. It is already listed in `.gitignore`.
 
-Optional: put your college logo at `assets/logo.png` and it will appear in the header.
+The header shows the college banner from `assets/college_banner.png`. Replace that file to use a different banner, or delete it to show `COLLEGE_NAME` as text instead.
 
 ## Run it
 
